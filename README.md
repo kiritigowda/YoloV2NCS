@@ -1,4 +1,4 @@
-# YOLOv2 for AMD's NN Inference Engine
+# YOLOv2 for Annie (AMD NN Inference Engine)
 
 *This project shows how to run tiny yolov2 (20 classes) with AMD's NN inference engine(Annie):*
 + A python convertor from yolo to caffe
@@ -8,24 +8,24 @@
 ---
 
 ### Preliminaries
-Please install amd ModelCompiler from https://github.com/GPUOpen-ProfessionalCompute-Libraries/amdovx-modules.git.
+Please install amdovx modules and modelcompiler from https://github.com/GPUOpen-ProfessionalCompute-Libraries/amdovx-modules.git.
 
 ### Step 1. Compile Python Wrapper
 ```make```
 
-### Step 2. Convert Caffe to Annie python lib as shown ModelCompiler (amdovx-modules/utils/model_compiler/)
-### convert caffe to AMD NNIR format and compile NNIR to deployment python lib using the following steps
-
+### Step 2. Convert Caffe to Annie python lib as shown below using NNIR ModelCompiler (amdovx-modules/utils/model_compiler/)
+### First convert caffe to NNIR format and compile NNIR to deployment python lib using the following steps
 
 ```
 % python caffe2nnir.py ./models/caffemodels/yoloV2Tiny20.caffemodel <nnirOutputFolder> --input-dims 1,3,416,416
-% follow the rest of the steps in ModelCompiler page to build python lib
+% python nnir2openvx.py [OPTIONS] <nnirInputFolder> <outputFolder> (details are in ModelCompiler page of amdovx_modules git repository)
 ```
-There will be a file libannpython.so and weights.bin
+There will be a file libannpython.so (under build) and weights.bin
 
 ### Step 3. Run tests
 ```	
 python3 ./detectionExample/Main.py --image ./data/dog.jpg --annpythonlib <libannpython.so> --weights <weights.bin>
+python3 ./detectionExample/Main.py --capture 0 ./data/dog.jpg --annpythonlib <libannpython.so> --weights <weights.bin> (live Capture)
 ```
 This runs inference and detections and results will be like this: 
 ![](/data/yolo_dog.jpg)
@@ -65,3 +65,4 @@ Research Only
 
 # Author
 duangenquan@gmail.com
+rrawther@amd.com
