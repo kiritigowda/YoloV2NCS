@@ -1,4 +1,4 @@
-# YOLOv2 for Intel/Movidius Neural Compute Stick (NCS)
+# YOLOv2 for AMD's NN Inference Engine
 
 *This project shows how to run tiny yolov2 (20 classes) with AMD's NN inference engine(Annie):*
 + A python convertor from yolo to caffe
