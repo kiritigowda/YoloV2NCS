@@ -1,8 +1,43 @@
-from libpydetector import YoloDetector
-import os, io, numpy, time
+﻿from libpydetector import YoloDetector
+import os, io, numpy, time, ctypes, array
 import numpy as np
-from mvnc import mvncapi as mvnc
 from skimage.transform import resize
+from ctypes import cdll, c_char_p
+from numpy.ctypeslib import ndpointer
+import csv
+
+# AnnInferenceLib = ctypes.cdll.LoadLibrary('/home/rajy/work/yolov2/build/libannmodule.so')
+# inf_fun = AnnInferenceLib.annRunInference
+# inf_fun.restype = ctypes.c_int
+# inf_fun.argtypes = [ctypes.c_void_p,
+#                ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),
+#                ctypes.c_size_t,
+#                ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"),
+#                ctypes.c_size_t]
+
+class AnnAPI:
+    def __init__(self,library):
+        self.lib = ctypes.cdll.LoadLibrary(library)
+        self.annQueryInference = self.lib.annQueryInference
+        self.annQueryInference.restype = ctypes.c_char_p
+        self.annQueryInference.argtypes = []
+        self.annCreateInference = self.lib.annCreateInference
+        self.annCreateInference.restype = ctypes.c_void_p
+        self.annCreateInference.argtypes = [ctypes.c_char_p]
+        self.annReleaseInference = self.lib.annReleaseInference
+        self.annReleaseInference.restype = ctypes.c_int
+        self.annReleaseInference.argtypes = [ctypes.c_void_p]
+        self.annCopyToInferenceInput = self.lib.annCopyToInferenceInput
+        self.annCopyToInferenceInput.restype = ctypes.c_int
+        self.annCopyToInferenceInput.argtypes = [ctypes.c_void_p, ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"), ctypes.c_size_t, ctypes.c_bool]
+        self.annCopyFromInferenceOutput = self.lib.annCopyFromInferenceOutput
+        self.annCopyFromInferenceOutput.restype = ctypes.c_int
+        self.annCopyFromInferenceOutput.argtypes = [ctypes.c_void_p, ndpointer(ctypes.c_float, flags="C_CONTIGUOUS"), ctypes.c_size_t]
+        self.annRunInference = self.lib.annRunInference
+        self.annRunInference.restype = ctypes.c_int
+        self.annRunInference.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        print('OK: AnnAPI found "' + self.annQueryInference().decode("utf-8") + '" as configuration in ' + library)
+
 
 class BBox(object):
     def __init__(self, bbox, xscale, yscale, offx, offy):
@@ -10,52 +45,33 @@ class BBox(object):
         self.top = int(bbox.top / yscale)-offy
         self.right = int(bbox.right / xscale)-offx
         self.bottom = int(bbox.bottom / yscale)-offy
+        self.x = bbox.x;
+        self.y = bbox.y;
+        self.width = bbox.width;
+        self.height = bbox.height;
         self.confidence = bbox.confidence
         self.objType = bbox.objType
         self.name = bbox.name
 
-class ObjectWrapper():
-    mvnc.global_set_option(mvnc.GlobalOption.RW_LOG_LEVEL, 2)
-    devices = mvnc.enumerate_devices()
-    devNum = len(devices)
-    if len(devices) == 0:
-        print('No MVNC devices found')
-        quit()
-    devHandle = []
-    graphHandle = []
-    fifoInHandle = []
-    fifoOutHandle = []
-
-    def __init__(self, graphfile):
+class AnnieObjectWrapper():
+    def __init__(self, annpythonlib, weightsfile):
         select = 1
         self.detector = YoloDetector(select)
-        for i in range(ObjectWrapper.devNum):
-            ObjectWrapper.devHandle.append(mvnc.Device(ObjectWrapper.devices[i]))
-            ObjectWrapper.devHandle[i].open()
-            # load blob
-            with open(graphfile, mode='rb') as f:
-                blob = f.read()
-            # create graph instance
-            ObjectWrapper.graphHandle.append(mvnc.Graph('inst' + str(i)))
-            # allocate resources
-            fifoIn, fifoOut = ObjectWrapper.graphHandle[i].allocate_with_fifos(ObjectWrapper.devHandle[i], blob)
-            ObjectWrapper.fifoInHandle.append(fifoIn)
-            ObjectWrapper.fifoOutHandle.append(fifoOut)
- 
-        self.dim = (416,416)
+        self.api = AnnAPI(annpythonlib)
+        input_info,output_info = self.api.annQueryInference().decode("utf-8").split(';')
+        input,name,ni,ci,hi,wi = input_info.split(',')
+        self.hdl = self.api.annCreateInference(weightsfile.encode('utf-8'))
+        self.dim = (int(hi),int(wi))
         self.blockwd = 12
         self.wh = self.blockwd*self.blockwd
         self.targetBlockwd = 13
         self.classes = 20
-        self.threshold = 0.2
+        self.threshold = 0.18
         self.nms = 0.4
 
     def __del__(self):
-        for i in range(ObjectWrapper.devNum):
-            ObjectWrapper.fifoInHandle[i].destroy()
-            ObjectWrapper.fifoOutHandle[i].destroy()
-            ObjectWrapper.graphHandle[i].destroy()
-            ObjectWrapper.devHandle[i].close()
+        self.api.annReleaseInference(self.hdl)
+
 
     def PrepareImage(self, img, dim):
         imgw = img.shape[1]
@@ -73,6 +89,7 @@ class ObjectWrapper():
         offy = int((dim[1] - newh)/2)
 
         imgb[offy:offy+newh,offx:offx+neww,:] = resize(img.copy()/255.0,(newh,neww),1)
+        #print('INFO:: newW:%d newH:%d offx:%d offy: %d elem0:%.5f elem1:%.5f elem2:%.5f' % (neww, newh, offx, offy, imgb[offy,offx+1,0], imgb[offy,offx+1,1], imgb[offy,offx+1,2]))
         im = imgb[:,:,(2,1,0)]
         return im, int(offx*imgw/neww), int(offy*imgh/newh), neww/dim[0], newh/dim[1]
 
@@ -82,55 +99,29 @@ class ObjectWrapper():
         out = out.reshape(shape)
         return out
 
-    def Detect(self, img, idx=0):
-        """Send image for inference on a single compute stick
-           
-            Args:
-                img: openCV image type
-                idx: index of the compute stick to use for inference
-            Returns:
-                [<BBox>]: array of BBox type objects for each result in the detection
-        """
+    def runInference(self,img, out):
         imgw = img.shape[1]
         imgh = img.shape[0]
+        #convert image to tensor format (RGB in seperate planes)
+        img_r = img[:,:,0]
+        img_g = img[:,:,1]
+        img_b = img[:,:,2]
+        img_t = np.concatenate((img_r, img_g, img_b), 0)
+        status = self.api.annCopyToInferenceInput(self.hdl, np.ascontiguousarray(img_t, dtype=np.float32), (img.shape[0]*img.shape[1]*3*4), 0)
+        #print('INFO: annCopyToInferenceInput status %d'  %(status))
+        status = self.api.annRunInference(self.hdl, 1)
+        #print('INFO: annRunInference status %d ' %(status))
+        status = self.api.annCopyFromInferenceOutput(self.hdl, np.ascontiguousarray(out, dtype=np.float32), out.nbytes)
+        #print('INFO: annCopyFromInferenceOutput status %d' %(status))
+        return out
 
+    def Detect(self, img):
+        imgw = img.shape[1]
+        imgh = img.shape[0]
         im,offx,offy,xscale,yscale = self.PrepareImage(img, self.dim)
-        #print('xscale = {}, yscale = {}'.format(xscale, yscale))
-
-        ObjectWrapper.graphHandle[idx].queue_inference_with_fifo_elem(
-                ObjectWrapper.fifoInHandle[idx],
-                ObjectWrapper.fifoOutHandle[idx],
-                im.astype(np.float32), 'user object')
-        out, userobj = ObjectWrapper.fifoOutHandle[idx].read_elem()
-        out = self.Reshape(out, self.dim)
-
-        internalresults = self.detector.Detect(out.astype(np.float32), int(out.shape[0]/self.wh), self.blockwd, self.blockwd, self.classes, imgw, imgh, self.threshold, self.nms, self.targetBlockwd)
+        out_buf = bytearray(12*12*125*4)
+        out = np.frombuffer(out_buf, dtype=numpy.float32)
+        output = self.runInference(im, out)
+        internalresults = self.detector.Detect(output.astype(np.float32), int(output.shape[0]/self.wh), self.blockwd, self.blockwd, self.classes, imgw, imgh, self.threshold, self.nms, self.targetBlockwd)
         pyresults = [BBox(x,xscale,yscale, offx, offy) for x in internalresults]
-        return pyresults
-
-    def Parallel(self, img):
-        """Send array of images for inference on multiple compute sticks
-           
-            Args:
-                img: array of images to run inference on
-           
-            Returns:
-                { <int>:[<BBox] }: A dict with key-value pairs mapped to compute stick device numbers and arrays of the detection boxs (BBox)
-        """
-        pyresults = {}
-        for i in range(ObjectWrapper.devNum):
-            im, offx, offy, w, h = self.PrepareImage(img[i], self.dim)
-            ObjectWrapper.graphHandle[i].queue_inference_with_fifo_elem(
-                    ObjectWrapper.fifoInHandle[i],
-                    ObjectWrapper.fifoOutHandle[i],
-                    im.astype(np.float32), 'user object')
-        for i in range(ObjectWrapper.devNum):
-            out, userobj = ObjectWrapper.fifoOutHandle[i].read_elem()
-            out = self.Reshape(out, self.dim)
-            imgw = img[i].shape[1]
-            imgh = img[i].shape[0]
-            internalresults = self.detector.Detect(out.astype(np.float32), int(out.shape[0]/self.wh), self.blockwd, self.blockwd, self.classes, imgw, imgh, self.threshold, self.nms, self.targetBlockwd)
-            res = [BBox(x, w, h, offx, offy) for x in internalresults]
-            if i not in pyresults:
-                pyresults[i] = res
         return pyresults

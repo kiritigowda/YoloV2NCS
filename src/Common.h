@@ -7,9 +7,11 @@
 #include <string>
 #include <stdio.h>
 
+
 struct DetectedObject
 {
     int left, top, right, bottom;
+    float x, y, w, h;       // bbox
     float confidence;
     int objType;
     std::string name;

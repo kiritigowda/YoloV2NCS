@@ -34,7 +34,7 @@ public:
 		bp::list bplist = bp::list();
 		void const *buffer;
 		long buflen;
-		bool isReadBuffer = !PyObject_AsReadBuffer(obj.ptr(), &buffer, (Py_ssize_t*) &buflen);
+		bool isReadBuffer = !PyObject_AsReadBuffer(obj.ptr(), &buffer, &buflen);
 		if(!isReadBuffer)
 		{
 			printf("Cannot read data!\n");
@@ -53,8 +53,6 @@ public:
 		}
 #endif
 
-
-		
 		for(size_t i = 0; i < results.size(); ++i)
 		{
 			bplist.append<DetectedObject>(results[i]);
@@ -78,6 +76,10 @@ BOOST_PYTHON_MODULE(libpydetector)
 		.def_readonly("top", &DetectedObject::top)
 		.def_readonly("right", &DetectedObject::right)
 		.def_readonly("bottom", &DetectedObject::bottom)
+		.def_readonly("x", &DetectedObject::x)
+		.def_readonly("y", &DetectedObject::y)
+		.def_readonly("width", &DetectedObject::w)
+		.def_readonly("height", &DetectedObject::h)
 		.def_readonly("confidence", &DetectedObject::confidence)
 		.def_readonly("objType", &DetectedObject::objType)
 		.def_readonly("name", &DetectedObject::name);

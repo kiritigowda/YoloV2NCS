@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 
+
 const int N = 5;
 const float biases[N*2] = {1.08,1.19,  3.42,4.41,  6.63,11.38,  9.42,5.11,  16.62,10.52};
 //const float biases[N*2] = {0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828};
@@ -121,7 +122,7 @@ void Region::GetDetections(float* data, int c, int h, int w,
 		{
 			ibox b = boxes[i];
 
-			printf("%f %f %f %f\n", b.x, b.y, b.w, b.h);
+			//printf("%f %f %f %f\n", b.x, b.y, b.w, b.h);
 
 			int left  = (b.x-b.w/2.)*imgw;
 			int right = (b.x+b.w/2.)*imgw;
@@ -139,9 +140,14 @@ void Region::GetDetections(float* data, int c, int h, int w,
 			obj.top = top;
 			obj.right = right;
 			obj.bottom = bot;
+			obj.x = b.x;
+			obj.y = b.y;
+			obj.w = b.w;
+			obj.h = b.h;
 			obj.confidence = prob;
 			obj.objType = iclass;
 			obj.name = objectnames[iclass];
+            //std::cout << "BoundingBox(ltrb): "<< i << "( " << left << " " << top << " "<< right << " "<< bot << ") " << "confidence: " << prob << " lablel: " << iclass << std::endl;			
 			objects.push_back(obj);
 		}
 	}

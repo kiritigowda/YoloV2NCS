@@ -1,4 +1,5 @@
 import os, cv2
+import csv
 
 colornum = 12
 colors = [(128,128,128),(128,0,0),(192,192,128),(255,69,0),(128,64,128),(60,40,222),(128,128,0),(192,128,128),(64,64,128),(64,0,128),(64,64,0),(0,128,192),(0,0,0)];
@@ -18,8 +19,10 @@ def Visualize(img, results):
                 bottom = results[i].bottom
 
                 cv2.rectangle(img_cp, (left,top), (right,bottom), clr, thickness=3)
-                cv2.rectangle(img_cp, (left,top-20),(right,top),(255,255,255),-1)
-                cv2.putText(img_cp,txt,(left+5,top-7),cv2.FONT_HERSHEY_SIMPLEX,0.5,clr,1)
-
+                size = cv2.getTextSize(txt, cv2.FONT_HERSHEY_COMPLEX_SMALL, 1.1, 2)
+                width = size[0][0]
+                height = size[0][1]
+                cv2.rectangle(img_cp, (left,top - (height + 2)),((left + width),top),clr,-1)
+                cv2.putText(img_cp,txt,(left,top),cv2.FONT_HERSHEY_COMPLEX_SMALL,1.1,(20,20,20),2)
 	return img_cp
 
