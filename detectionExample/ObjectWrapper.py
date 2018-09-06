@@ -1,4 +1,5 @@
-﻿from libpydetector import YoloDetector
+﻿from __future__ import division
+from libpydetector import YoloDetector
 import os, io, numpy, time, ctypes, array
 import numpy as np
 from skimage.transform import resize

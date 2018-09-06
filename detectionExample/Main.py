@@ -1,3 +1,5 @@
+from __future__ import division
+
 import sys,os,time,csv,getopt,cv2,argparse
 import numpy as np
 from datetime import datetime
