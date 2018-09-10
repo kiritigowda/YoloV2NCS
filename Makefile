@@ -1,6 +1,6 @@
 CC = gcc
 CPP = g++
-PYTHON_VERSION = 3.5m
+PYTHON_VERSION = 2.7
 PYTHON_INCLUDE = /usr/include/python$(PYTHON_VERSION)
 
 IDIRS = -I$(PYTHON_INCLUDE) -I.
