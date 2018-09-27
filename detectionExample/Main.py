@@ -48,12 +48,18 @@ if __name__ == '__main__':
                         default='./weights.bin', help='A directory with images.')    
     parser.add_argument('--resultsfolder', dest='resultfolder', type=str,
                         default='./', help='A directory with images.')
+    parser.add_argument('--imageWidth', dest='imageWidth', type=int,
+                        default=416, help='YoloV2 image width')
+    parser.add_argument('--imageHeight', dest='imageHeight', type=int,
+                        default=416, help='YoloV2 image height')
     args = parser.parse_args()
 
     outputdir = args.resultfolder
     weightsfile = args.weightsfile
     annpythonlib = args.pyhtonlib
     videoFile = args.video
+    imageWidth = args.imageWidth
+    imageHeight = args.imageHeight
     detector = AnnieObjectWrapper(annpythonlib, weightsfile)
     
     if sys.argv[1] == '--image':
@@ -107,6 +113,7 @@ if __name__ == '__main__':
     elif sys.argv[1] == '--video':
         # video preprocess
         print ('Video File')
+        window_name = "AMD YoloV2 Video File"
         capmode = args.capmode    
         cap = cv2.VideoCapture(videoFile)
         assert cap.isOpened(), 'Cannot capture source'    
@@ -116,10 +123,12 @@ if __name__ == '__main__':
             ret, frame = cap.read()
             if ret:
                 #frame = cv2.flip(frame, 1)
-                frame = cv2.resize(frame, (416, 416))           
+                frame = cv2.resize(frame, (imageWidth, imageHeight))           
                 results = detector.Detect(frame)
                 imdraw = Visualize(frame, results)
-                cv2.imshow('AMD YoloV2 Video File', imdraw)
+                #cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
+                #cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+                cv2.imshow(window_name, imdraw)
                 key = cv2.waitKey(1)
                 if key & 0xFF == ord('q'):
                     break
