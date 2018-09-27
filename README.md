@@ -24,8 +24,9 @@ There will be a file libannpython.so (under build) and weights.bin
 
 ### Step 3. Run tests
 ```	
-python3 ./detectionExample/Main.py --image ./data/dog.jpg --annpythonlib <libannpython.so> --weights <weights.bin>
-python3 ./detectionExample/Main.py --capture 0 ./data/dog.jpg --annpythonlib <libannpython.so> --weights <weights.bin> (live Capture)
+python ./detectionExample/Main.py --image ./data/dog.jpg --annpythonlib <libannpython.so> --weights <weights.bin>
+python ./detectionExample/Main.py --capture 0 --annpythonlib <libannpython.so> --weights <weights.bin> (live Capture)
+python ./detectionExample/Main.py --video <video location> --annpythonlib <libannpython.so> --weights <weights.bin>
 ```
 This runs inference and detections and results will be like this: 
 ![](/data/yolo_dog.jpg)
