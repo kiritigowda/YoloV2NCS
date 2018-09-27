@@ -53,6 +53,7 @@ if __name__ == '__main__':
     outputdir = args.resultfolder
     weightsfile = args.weightsfile
     annpythonlib = args.pyhtonlib
+    videoFile = args.video
     detector = AnnieObjectWrapper(annpythonlib, weightsfile)
     
     if sys.argv[1] == '--image':
@@ -105,7 +106,28 @@ if __name__ == '__main__':
         exit()
     elif sys.argv[1] == '--video':
         # video preprocess
-        print ('do not support video yet')
+        print ('Video File')
+        capmode = args.capmode    
+        cap = cv2.VideoCapture(videoFile)
+        assert cap.isOpened(), 'Cannot capture source'    
+        frames = 0
+        start = time.time()
+        while cap.isOpened(): 
+            ret, frame = cap.read()
+            if ret:
+                #frame = cv2.flip(frame, 1)
+                frame = cv2.resize(frame, (416, 416))           
+                results = detector.Detect(frame)
+                imdraw = Visualize(frame, results)
+                cv2.imshow('AMD YoloV2 Video File', imdraw)
+                key = cv2.waitKey(1)
+                if key & 0xFF == ord('q'):
+                    break
+                frames += 1
+                if (frames % 16 == 0):
+                    print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
+            else:
+                break
         exit()
     elif sys.argv[1] == '--capture':
         print ('Capturing Live')
