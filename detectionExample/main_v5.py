@@ -73,7 +73,7 @@ class App(QWidget):
 		self.layout.setSpacing(5)
 		#self.layout.addWidget(self.imageWidget,1,0)
 		self.layout.addWidget(self.label,2,0)
-		self.layout.addWidget(self.tableWidget,3,0) 
+		self.layout.addWidget(self.tableWidget,3,0)
 
 		self.setLayout(self.layout) 
 		
@@ -86,20 +86,45 @@ class App(QWidget):
 		
 
 		self.tableWidget.setRowCount(0)
-		self.tableWidget.setColumnCount(2)
-		self.tableWidget.setHorizontalHeaderLabels(['Name', 'Confidence'])
+		self.tableWidget.setColumnCount(3)
+		self.tableWidget.setHorizontalHeaderLabels(['Occurence', 'Name', 'Confidence'])
 		for row_number in xrange(0,min(5,len(data))):
 			#print data[row_number]
 			row_number =  self.tableWidget.rowCount()
 			self.tableWidget.insertRow(row_number)
-			self.tableWidget.setItem(row_number, 0, QTableWidgetItem(str(data[row_number][1])))
+			self.tableWidget.setItem(row_number, 1, QTableWidgetItem(str(data[row_number][1])))
 			conf = str(int(round(float(data[row_number][2]), 4)*100)) + "%"
-			self.tableWidget.setItem(row_number, 1, QTableWidgetItem(conf))
+			self.tableWidget.setItem(row_number, 2, QTableWidgetItem(conf))
+
+		self.tableWidget.setItem(0,0,QTableWidgetItem("Most Recent"))
+		self.tableWidget.setItem(2,0,QTableWidgetItem("Older"))
+		self.tableWidget.setItem(4,0,QTableWidgetItem("Oldest"))
+		self.tableWidget.setAlternatingRowColors(True)
 		self.tableWidget.resizeColumnsToContents()
 		#self.tableWidget.resizeRowsToContents()
 		
 		# Show widget
 		self.show()
+
+def show_legend():
+	keys = ['key','1', '2', 'f', 'q' ,'Space Bar', 'c', 'x']
+	modes = ['mode','folder 1 - one iteration' , 'folder 2 - one iteration' , 'folder - always', 'quit','pause/play', 'camera mode', 'cascade mode']
+	fontScale = 1
+	thickness = 1
+	legendGeometry = (300,500)
+	legend = np.zeros(legendGeometry, dtype=np.uint8)
+	
+	for i in xrange(len(keys)):
+		size = cv2.getTextSize(keys[i], cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, 1)
+		width = size[0][0]
+		height = size[0][1]
+
+		#cv2.rectangle(legend, (5, (i * 25) + 17),(300, (i * 25) + 25),(160,82,45),-1)	
+		cv2.putText(legend, keys[i], (5, ((i+2)*25)), cv2.FONT_HERSHEY_COMPLEX_SMALL, fontScale, (255,255,255), thickness,2 )
+		cv2.putText(legend, modes[i], (150, (i+2) * 25), cv2.FONT_HERSHEY_COMPLEX_SMALL, fontScale, (255,255,255), thickness,2 )
+		#cv2.rectangle(legend, (5, (i * 25) + 17),(300, (i * 25) + 25),(0,0,255),-1)
+	
+	cv2.imshow("Class Legend", legend) 
 
 def image_function():
 	# image preprocess
@@ -125,6 +150,7 @@ def image_function():
 
 
 def imagefolder_function(imagedir, outputdir):
+	show_legend()
 	count = 0
 	count_cascade = 0
 	start = datetime.now()
@@ -163,7 +189,7 @@ def imagefolder_function(imagedir, outputdir):
 
 			for img in imdraw_crop:
 				if img.size != 0:
-					img = cv2.resize(img, dsize=(299,299), interpolation = cv2.INTER_CUBIC)
+					#img = cv2.resize(img, dsize=(299,299), interpolation = cv2.INTER_CUBIC)
 					path = os.path.join(cascadeFile ,  'yolo-output_'+ str(count_cascade) + '.jpg')
 					cv2.imwrite(path,img)
 					count_cascade += 1
@@ -180,7 +206,18 @@ def imagefolder_function(imagedir, outputdir):
 			if newKey & 0xFF == ord('q'):
 				exit()
 
-			#if newKey & 0xFF == ord('x'):
+			if newKey & 0xFF == ord('x'):
+				currentDirectory = os.getcwd()
+				fromDirectory = os.getcwd() + '/YoloOutCascadeClassfication'
+				
+				os.chdir("../annie-capture-demo/")
+				toDirectory = os.getcwd() + '/YoloOutCascadeClassfication'
+				if os.path.exists(toDirectory):
+					shutil.rmtree(toDirectory)
+				os.makedirs(toDirectory)
+				copy_tree(fromDirectory, toDirectory)
+				subprocess.call(['python', 'AnnieCapture.py', '--imagefolder' , 'YoloOutCascadeClassfication/' , '--pm' ,'1', '--pa', '0'])
+				os.chdir(currentDirectory)
 		
 		end = datetime.now()
 		elapsedTime = end-start
@@ -200,6 +237,7 @@ def imagefolder_function(imagedir, outputdir):
 
 def camera_function():
 	print ('Capturing Live')
+	show_legend()
 
 	outputdir = os.getcwd() + '/YoloOutCascadeClassfication'
 	if os.path.exists(outputdir):
@@ -212,7 +250,7 @@ def camera_function():
 	frames = 0
 	count = 0
 	start_cam = time.time()
-	
+	data = []
 	dictnames = ['class','class_name','confidence', 'x', 'y', 'width', 'height']
 	with open('history_file.csv', 'w+') as csvHistoryFile:
 		writer = csv.DictWriter(csvHistoryFile, fieldnames=dictnames)
@@ -230,17 +268,17 @@ def camera_function():
 					writer.writerow({'class': results[i].objType, 'class_name':results[i].name ,'confidence': "{:.5f}".format(results[i].confidence), 'x': "{:.5f}".format(results[i].x), 'y': "{:.5f}".format(results[i].y), \
 					'width': "{:.5f}".format(results[i].width), 'height': "{:.5f}".format(results[i].height)})
 
-				frames += 1
-				if (frames % 16 == 0):
-					print("FPS of the video is {:5.2f}".format( frames / (time.time() - start_cam)))
-
-					for img in imdraw_crop:
+				for img in imdraw_crop:
 						if img.size != 0:
-							img = cv2.resize(img, dsize=(299,299), interpolation = cv2.INTER_CUBIC)
+							#img = cv2.resize(img, dsize=(224,224), interpolation = cv2.INTER_CUBIC)
 							path = os.path.join(outputdir ,  'yolo-output_'+ str(count) + '.jpg')
 							cv2.imwrite(path,img)
 							count += 1
-					
+
+				frames += 1
+				if (frames % 16 == 0):
+					print("FPS of the video is {:5.2f}".format( frames / (time.time() - start_cam)))
+				if (frames % 12 == 0):
 					csvHistoryFile.seek(0)
 					resultCSV = csv.reader(csvHistoryFile)
 					next(resultCSV,None) # skip header
@@ -257,7 +295,17 @@ def camera_function():
 							if resultDataBase[i][0] == resultDataBase[i-1][0]:
 								del resultDataBase[i]
 						
-						qt_tryme.createTable(resultDataBase)
+						data.insert(0,resultDataBase[0])
+						
+						for i in xrange(len(data) - 1, 0 , -1):
+							if data[i][0] == data[i-1][0]: 
+								del data[i]
+						"""
+						for i in data:
+							print i
+						"""
+						qt_tryme.createTable(data)
+						#qt_tryme.createTable(resultDataBase)
 
 						csvHistoryFile.seek(0)
 						writer = csv.DictWriter(csvHistoryFile, fieldnames=dictnames)
@@ -268,7 +316,7 @@ def camera_function():
 					break
 
 				if key & 0xFF == ord('1'):
-					cap.release()
+					#cap.release()
 					imagedir  = os.getcwd() + '/images_1/'
 					outputdir = os.getcwd() + '/outputFolder_1/'
 					if not os.path.exists(outputdir):
@@ -276,7 +324,7 @@ def camera_function():
 					imagefolder_function(imagedir, outputdir)
 			   
 				if key & 0xFF == ord('2'):
-					cap.release()
+					#cap.release()
 					imagedir  = os.getcwd() + '/images_2/'
 					outputdir = os.getcwd() + '/outputFolder_2/'
 					if not os.path.exists(outputdir):
@@ -313,6 +361,7 @@ def camera_function():
 			else:
 				break
 		exit()
+
 
 
 if __name__ == '__main__':
