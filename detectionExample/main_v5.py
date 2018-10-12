@@ -124,7 +124,7 @@ def show_legend():
 		cv2.putText(legend, modes[i], (150, (i+2) * 25), cv2.FONT_HERSHEY_COMPLEX_SMALL, fontScale, (255,255,255), thickness,2 )
 		#cv2.rectangle(legend, (5, (i * 25) + 17),(300, (i * 25) + 25),(0,0,255),-1)
 	
-	cv2.imshow("Class Legend", legend) 
+	cv2.imshow("Yolo Legend", legend) 
 
 def image_function():
 	# image preprocess
@@ -149,7 +149,7 @@ def image_function():
 		exit()
 
 
-def imagefolder_function(imagedir, outputdir):
+def imagefolder_function(imagedir, outputdir, anniedir):
 	show_legend()
 	count = 0
 	count_cascade = 0
@@ -173,12 +173,12 @@ def imagefolder_function(imagedir, outputdir):
 			img = cv2.imread(imagedir + image)
 			results = detector.Detect(img) 
 			imdraw = Visualize(img, results)
-			imdraw_crop = VisualizeBox(img,results,cascadeFile)
+			imdraw_crop = VisualizeBox(image,img,results,cascadeFile, anniedir)
 			path = os.path.join(outputdir ,  'yolo-output_'+ str(count) + '.jpg')
 
 			#time.sleep(0.5)
 			cv2.imshow('AMD YoloV2 Live', imdraw)
-			time.sleep(0.5)
+			time.sleep(0.8)
 			#cv2.waitKey(1)
 			for i in range(len(results)):
 				#writer.writerow({'input_image_name': 'output_' + str(count) + '.jpg', 'x': results[i].bbox.x, 'y': results[i].bbox.y, 'width': results[i].bbox.w, \
@@ -261,7 +261,7 @@ def camera_function():
 				frame = cv2.flip(frame, 1)                
 				results = detector.Detect(frame)
 				imdraw = Visualize(frame, results)
-				imdraw_crop = VisualizeBox(frame,results,outputdir)
+				imdraw_crop = VisualizeCamera(frame,results,outputdir)
 				cv2.imshow('AMD YoloV2 Live', imdraw)
 
 				for i in range(len(results)):
@@ -317,19 +317,21 @@ def camera_function():
 
 				if key & 0xFF == ord('1'):
 					#cap.release()
-					imagedir  = os.getcwd() + '/images_1/'
+					imagedir  = os.getcwd() + '/images1_416X416/'
+					anniedir = os.getcwd() + '/images1_1024X1024/'
 					outputdir = os.getcwd() + '/outputFolder_1/'
 					if not os.path.exists(outputdir):
 						os.makedirs(outputdir)
-					imagefolder_function(imagedir, outputdir)
+					imagefolder_function(imagedir, outputdir, anniedir)
 			   
 				if key & 0xFF == ord('2'):
 					#cap.release()
-					imagedir  = os.getcwd() + '/images_2/'
+					imagedir  = os.getcwd() + '/images2_416X416/'
+					anniedir = os.getcwd() + '/images2_1024X1024/'
 					outputdir = os.getcwd() + '/outputFolder_2/'
 					if not os.path.exists(outputdir):
 						os.makedirs(outputdir)
-					imagefolder_function(imagedir, outputdir)
+					imagefolder_function(imagedir, outputdir, anniedir)
 
 				if key == 32:
 					if cv2.waitKey(0) == 32:
@@ -337,13 +339,14 @@ def camera_function():
 
 				if key & 0xFF == ord('f'):
 					cap.release()
-					imagedir  = os.getcwd() + '/images/'
+					imagedir  = os.getcwd() + '/images3_416X416/'
+					anniedir = os.getcwd() + '/images3_1024X1024/'
 					outputdir = os.getcwd() + '/outputFolder_3/'
 					if not os.path.exists(outputdir):
 						os.makedirs(outputdir)
 					flag = True
 					while (flag):
-						imagefolder_function(imagedir, outputdir)
+						imagefolder_function(imagedir, outputdir, anniedir)
 			   
 				if key & 0xFF == ord('x'):
 					currentDirectory = os.getcwd()
@@ -369,7 +372,7 @@ if __name__ == '__main__':
 	parser.add_argument('--image', dest='image', type=str,
 						default='./images/dog.jpg', help='An image path.')
 	parser.add_argument('--imagefolder', dest='imagefolder', type=str,
-						default='./images/' + 'images', help='A directory with images.')
+						default='./images1_416X416/' + 'images', help='A directory with images of size 416X416')
 	parser.add_argument('--video', dest='video', type=str,
 						default='./test1.mp4.avi', help='A video path.')
 	parser.add_argument('--capture', dest='capmode', type=int,
@@ -377,7 +380,9 @@ if __name__ == '__main__':
 	parser.add_argument('--annpythonlib', dest='pythonlib', type=str,
 						default='./libannpython.so', help='pythonlib')
 	parser.add_argument('--weights', dest='weightsfile', type=str,
-						default='./weights.bin', help='A directory with images.')    
+						default='./weights.bin', help='A directory with images.')
+	parser.add_argument('--cascade', dest='cascade', type=str,
+						default='./images1_1024X1024', help='A directory with images of size 1024X1024')    
 	parser.add_argument('--resultsfolder', dest='resultfolder', type=str,
 						default=os.getcwd() + '/outputFolder', help='A directory with images.')
 	parser.add_argument('--imageWidth', dest='imageWidth', type=int,
@@ -388,7 +393,7 @@ if __name__ == '__main__':
 
 	 
    
-
+	anniedir = args.cascade
 	weightsfile = args.weightsfile
 	annpythonlib = args.pythonlib
 	detector = AnnieObjectWrapper(annpythonlib, weightsfile)
@@ -406,7 +411,7 @@ if __name__ == '__main__':
 		if not os.path.exists(outputdir):
 			os.makedirs(outputdir);     
 		imagedir  = args.imagefolder
-		imagefolder_function(imagedir, outputdir)
+		imagefolder_function(imagedir, outputdir, anniedir)
 		exit()
 	elif sys.argv[1] == '--capture':
 		camera_function()
