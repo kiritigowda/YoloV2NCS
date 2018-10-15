@@ -32,7 +32,9 @@ This runs inference and detections and results will be like this:
 ![](/data/yolo_dog.jpg)
 
 # Yolo Cascaded with Classification
-## 1. Resize to 416X416 for Yolo and 1024X1024 for classification Use the following link to resize the images. 
+## 1. Resize to 416X416 for Yolo and 1024X1024 for classification
+
+Use the following link to resize the images. 
 
 https://github.com/kiritigowda/help/tree/master/classificationLabelGenerator
 
