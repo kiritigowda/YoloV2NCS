@@ -173,7 +173,7 @@ def imagefolder_function(imagedir, outputdir, anniedir):
 			img = cv2.imread(imagedir + image)
 			results = detector.Detect(img) 
 			imdraw = Visualize(img, results)
-			imdraw_crop = VisualizeBox(image,img,results,cascadeFile, anniedir)
+			imdraw_crop = VisualizeBox(image,img,results, anniedir)
 			path = os.path.join(outputdir ,  'yolo-output_'+ str(count) + '.jpg')
 
 			#time.sleep(0.5)
