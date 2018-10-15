@@ -90,7 +90,7 @@ def VisualizeCamera(img, results, outputdir):
     
     return crop_imgs
 
-def VisualizeBox(image, img, results, outputdir, anniedir):
+def VisualizeBox(image, img, results, anniedir):
     img_cp = img.copy()
     #print "type img_cp= ", type(img_cp)
     crop_imgs = []
