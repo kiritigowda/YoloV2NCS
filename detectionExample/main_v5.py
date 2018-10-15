@@ -53,7 +53,7 @@ class App(QWidget):
 
 	def initUI(self):
 
-		self.title = 'OBJECT DETECTION'
+		self.title = 'MIVision OBJECT DETECTION'
 		self.setWindowTitle(self.title)
 		cwd = os.getcwd() 
 		self.setWindowIcon(QIcon(cwd + '/detectionExample/icons/amd-logo-150x150.jpg'))
@@ -124,7 +124,7 @@ def show_legend():
 		cv2.putText(legend, modes[i], (150, (i+2) * 25), cv2.FONT_HERSHEY_COMPLEX_SMALL, fontScale, (255,255,255), thickness,2 )
 		#cv2.rectangle(legend, (5, (i * 25) + 17),(300, (i * 25) + 25),(0,0,255),-1)
 	
-	cv2.imshow("Yolo Legend", legend) 
+	cv2.imshow("MIVision YoloV2 Legend", legend) 
 
 def image_function():
 	# image preprocess
@@ -177,7 +177,7 @@ def imagefolder_function(imagedir, outputdir, anniedir):
 			path = os.path.join(outputdir ,  'yolo-output_'+ str(count) + '.jpg')
 
 			#time.sleep(0.5)
-			cv2.imshow('AMD YoloV2 Live', imdraw)
+			cv2.imshow('MIVision YoloV2 Live', imdraw)
 			time.sleep(0.8)
 			#cv2.waitKey(1)
 			for i in range(len(results)):
@@ -262,18 +262,18 @@ def camera_function():
 				results = detector.Detect(frame)
 				imdraw = Visualize(frame, results)
 				imdraw_crop = VisualizeCamera(frame,results,outputdir)
-				cv2.imshow('AMD YoloV2 Live', imdraw)
+				cv2.imshow('MIVision YoloV2 Live', imdraw)
 
 				for i in range(len(results)):
 					writer.writerow({'class': results[i].objType, 'class_name':results[i].name ,'confidence': "{:.5f}".format(results[i].confidence), 'x': "{:.5f}".format(results[i].x), 'y': "{:.5f}".format(results[i].y), \
 					'width': "{:.5f}".format(results[i].width), 'height': "{:.5f}".format(results[i].height)})
 
 				for img in imdraw_crop:
-						if img.size != 0:
-							#img = cv2.resize(img, dsize=(224,224), interpolation = cv2.INTER_CUBIC)
-							path = os.path.join(outputdir ,  'yolo-output_'+ str(count) + '.jpg')
-							cv2.imwrite(path,img)
-							count += 1
+					if img.size != 0:
+						#img = cv2.resize(img, dsize=(224,224), interpolation = cv2.INTER_CUBIC)
+						path = os.path.join(outputdir ,  'yolo-output_'+ str(count) + '.jpg')
+						cv2.imwrite(path,img)
+						count += 1
 
 				frames += 1
 				if (frames % 16 == 0):
@@ -316,23 +316,24 @@ def camera_function():
 					break
 
 				if key & 0xFF == ord('1'):
-					#cap.release()
+					cap.release()
 					imagedir  = os.getcwd() + '/images1_416X416/'
 					anniedir = os.getcwd() + '/images1_1024X1024/'
 					outputdir = os.getcwd() + '/outputFolder_1/'
 					if not os.path.exists(outputdir):
 						os.makedirs(outputdir)
 					imagefolder_function(imagedir, outputdir, anniedir)
-			   
+			   		cap = cv2.VideoCapture(0)
+
 				if key & 0xFF == ord('2'):
-					#cap.release()
+					cap.release()
 					imagedir  = os.getcwd() + '/images2_416X416/'
 					anniedir = os.getcwd() + '/images2_1024X1024/'
 					outputdir = os.getcwd() + '/outputFolder_2/'
 					if not os.path.exists(outputdir):
 						os.makedirs(outputdir)
 					imagefolder_function(imagedir, outputdir, anniedir)
-
+					cap = cv2.VideoCapture(0)
 				if key == 32:
 					if cv2.waitKey(0) == 32:
 						continue
@@ -419,7 +420,7 @@ if __name__ == '__main__':
 	elif sys.argv[1] == '--video':
 		# video preprocess
 		print ('Video File')
-		window_name = "AMD YoloV2 Video File"
+		window_name = "MIVision YoloV2 Video File"
 		capmode = args.capmode    
 		cap = cv2.VideoCapture(videoFile)
 		assert cap.isOpened(), 'Cannot capture source'    
