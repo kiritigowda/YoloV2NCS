@@ -31,14 +31,14 @@ python ./detectionExample/Main.py --video <video location> --annpythonlib <liban
 This runs inference and detections and results will be like this: 
 ![](/data/yolo_dog.jpg)
 
-# Yolo Cascaded with Classification
-## 1. Resize to 416X416 for Yolo and 1024X1024 for classification
+## Yolo Cascaded with Classification
+### 1. Resize to 416X416 for Yolo and 1024X1024 for classification
 
 Use the following link to resize the images. 
 
 https://github.com/kiritigowda/help/tree/master/classificationLabelGenerator
 
-## 2. Run step 1 and step 2 as above.
+### 2. Run step 1 and step 2 as above.
 
 ### 3. Run tests
 ```
