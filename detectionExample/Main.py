@@ -261,7 +261,7 @@ def camera_function():
 				frame = cv2.flip(frame, 1)                
 				results = detector.Detect(frame)
 				imdraw = Visualize(frame, results)
-				imdraw_crop = VisualizeCamera(frame,results,outputdir)
+				imdraw_crop = VisualizeCamera(frame,results)
 				cv2.imshow('MIVision YoloV2 Live', imdraw)
 
 				for i in range(len(results)):

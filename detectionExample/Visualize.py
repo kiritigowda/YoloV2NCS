@@ -38,7 +38,7 @@ def Visualize(img, results):
 
 
 
-def VisualizeCamera(img, results, outputdir):
+def VisualizeCamera(img, results):
     img_cp = img.copy()
     #print "type = ", type(img_cp)
     crop_imgs = []
@@ -72,7 +72,7 @@ def VisualizeCamera(img, results, outputdir):
 
                 #print img_cp.size
                 #print crop_img.size
-                if crop_img.size > 150528:
+                if crop_img.size > 57600:
                     cv2.rectangle(img_cp, (x1,y1), (x2,y2), clr, thickness=1)
                     size = cv2.getTextSize(txt, cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, 1)
                     width = size[0][0]
