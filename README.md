@@ -46,6 +46,7 @@ annie-capture demo: https://github.com/kiritigowda/annie-capture-demo
 ### 4. Run tests
 ```
 python -W ignore detectionExample/Main.py --imagefolder <images1_416X416/> --cascade <images1_1024X1024/> --weights <weights.bin> --annpythonlib <libannpython.so>
+(and use key press for mode change)
 ```
 (or)
 ```
