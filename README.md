@@ -38,9 +38,12 @@ Use the following link to resize the images.
 
 https://github.com/kiritigowda/help/tree/master/classificationLabelGenerator
 
-### 2. Run step 1 and step 2 as above.
+### 2. Save annie-capture demo and YoloV2NCS in a common folder
+annie-capture demo: https://github.com/kiritigowda/annie-capture-demo
 
-### 3. Run tests
+### 3. Run step 1 and step 2 as above.
+
+### 4. Run tests
 ```
 python -W ignore detectionExample/Main.py --imagefolder <images1_416X416/> --cascade <images1_1024X1024/> --weights <weights.bin> --annpythonlib <libannpython.so>
 ```
