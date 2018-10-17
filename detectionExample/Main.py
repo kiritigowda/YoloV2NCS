@@ -1,5 +1,5 @@
 """
-Final as of Oct 15th 
+Demo: YoloV2 Live capture and folder modes 
 """
 from __future__ import division
 
