@@ -71,14 +71,10 @@ if __name__ == '__main__':
         #np.save(f, img)
         #f.close()
         start = datetime.now()
-
         results = detector.Detect(img)
-
         end = datetime.now()
         elapsedTime = end-start
-
         print ('total time is " milliseconds', elapsedTime.total_seconds()*1000)
-
         imdraw = Visualize(img, results)
         cv2.imshow('Demo',imdraw)
         cv2.imwrite('test.jpg',imdraw)
@@ -113,30 +109,35 @@ if __name__ == '__main__':
     elif sys.argv[1] == '--video':
         # video preprocess
         print ('Video File')
-        window_name = "AMD YoloV2 Video File"
-        capmode = args.capmode    
-        cap = cv2.VideoCapture(videoFile)
-        assert cap.isOpened(), 'Cannot capture source'    
-        frames = 0
-        start = time.time()
-        while cap.isOpened(): 
-            ret, frame = cap.read()
-            if ret:
-                #frame = cv2.flip(frame, 1)
-                frame = cv2.resize(frame, (imageWidth, imageHeight))           
-                results = detector.Detect(frame)
-                imdraw = Visualize(frame, results)
-                #cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
-                #cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-                cv2.imshow(window_name, imdraw)
-                key = cv2.waitKey(1)
-                if key & 0xFF == ord('q'):
+        window_name = "AMD Object Detection"
+        cv2.namedWindow(window_name, cv2.WINDOW_GUI_EXPANDED)
+        capmode = args.capmode
+        loop = 1
+        while loop:
+            cap = cv2.VideoCapture(videoFile)
+            assert cap.isOpened(), 'Cannot capture source'
+            frames = 0
+            start = time.time()
+            while cap.isOpened():
+                ret, frame = cap.read()
+                if ret:
+                    frame = cv2.resize(frame, (imageWidth, imageHeight))
+                    results = detector.Detect(frame)
+                    imdraw = Visualize(frame, results)
+                    cv2.imshow(window_name, imdraw)
+                    # exit of quit loop
+                    key = cv2.waitKey(1)
+                    if key & 0xFF == ord('q'):
+                        break
+                    elif key & 0xFF == ord('e'):
+                        loop = 0
+                        break
+
+                    frames += 1
+                    if (frames % 16 == 0):
+                        print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
+                else:
                     break
-                frames += 1
-                if (frames % 16 == 0):
-                    print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
-            else:
-                break
         exit()
     elif sys.argv[1] == '--capture':
         print ('Capturing Live')
