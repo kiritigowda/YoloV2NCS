@@ -1,9 +1,10 @@
 from __future__ import division
 import os, cv2
 import csv
+import numpy as np
 
 colornum = 20
-colors = [
+colors =    [
             (160,82,45),        # aeroplane
             (128,0,0),          # bicycle
             (47,79,79),         # bird
@@ -16,7 +17,7 @@ colors = [
             (250,128,114),      # cow
             (153,50,204),       # diningtable
             (130,230,150),      # dog
-            (0,0,255),          # horse
+            (0,220,255),        # horse
             (0,191,255),        # motorbike
             (0,0,255),          # person
             (0,255,255),        # potted plant
@@ -24,7 +25,30 @@ colors = [
             (0,128,0),          # sofa
             (124,252,0),        # train
             (199,21,133)        # tvmonitor
-          ];
+            ];
+
+CLASSES =   [
+            "aeroplane",
+            "bicycle",
+            "bird",
+            "boat",
+            "bottle",
+            "bus",
+            "car",
+            "cat",
+            "chair",
+            "cow",
+            "dining table",
+            "dog",
+            "horse",
+            "motorbike",
+            "person",
+            "potted plant",
+            "sheep",
+            "sofa",
+            "train",
+            "tvmonitor"
+            ]
 
 def Visualize(img, results):
 	img_cp = img.copy()
@@ -52,3 +76,17 @@ def Visualize(img, results):
                 cv2.putText(img_cp,txt,((left + 5),(bottom-5)),cv2.FONT_HERSHEY_SIMPLEX,0.6,(255,255,255),1)
 	return img_cp
 
+def LegendImage():
+    window_name = "AMD Object Detection - Legend"
+    # initialize the legend visualization
+    legend = np.zeros(((len(CLASSES) * 25), 200, 3), dtype="uint8")
+    legend.fill(255)
+    # loop over the class names + colors
+    for (i, (className, color)) in enumerate(zip(CLASSES, colors)):
+        # draw the class name + color on the legend
+        color = [int(c) for c in color]
+        cv2.putText(legend, className, (5, (i * 25) + 17),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+        cv2.rectangle(legend, (125, (i * 25)), (200, (i * 25) + 25),
+        tuple(color), -1)
+    #cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+    cv2.imshow(window_name, legend)

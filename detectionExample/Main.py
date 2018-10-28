@@ -109,10 +109,11 @@ if __name__ == '__main__':
     elif sys.argv[1] == '--video':
         # video preprocess
         print ('Video File')
-        window_name = "AMD Object Detection"
+        window_name = "AMD Object Detection - Live"
         cv2.namedWindow(window_name, cv2.WINDOW_GUI_EXPANDED)
         capmode = args.capmode
         loop = 1
+        LegendImage()
         while loop:
             cap = cv2.VideoCapture(videoFile)
             assert cap.isOpened(), 'Cannot capture source'
