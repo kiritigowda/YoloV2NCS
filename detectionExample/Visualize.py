@@ -66,14 +66,14 @@ def Visualize(img, results):
                 confidence = results[i].confidence
                 confidence = int(confidence * 100)
                 #confidence = format(confidence,'.2f')
-                txt = txt+' '+str(confidence)+'%'
-                cv2.rectangle(img_cp, (left,top), (right,bottom), clr, thickness=2)
-                size = cv2.getTextSize(txt, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
-                width = size[0][0] + 10
-                height = size[0][1]
-
-                cv2.rectangle(img_cp, (left, (bottom-5) - (height+5)), ((left + width), (bottom-5)),clr,-1)
-                cv2.putText(img_cp,txt,((left + 5),(bottom-5)),cv2.FONT_HERSHEY_SIMPLEX,0.6,(255,255,255),1)
+                if confidence > 20:
+                    #txt = txt+' '+str(confidence)+'%'
+                    cv2.rectangle(img_cp, (left,top), (right,bottom), clr, thickness=2)
+                    size = cv2.getTextSize(txt, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
+                    width = size[0][0] + 10
+                    height = size[0][1]
+                    cv2.rectangle(img_cp, (left, (bottom-5) - (height+5)), ((left + width), (bottom-5)),clr,-1)
+                    cv2.putText(img_cp,txt,((left + 5),(bottom-10)),cv2.FONT_HERSHEY_SIMPLEX,0.6,(255,255,255),1)
 	return img_cp
 
 def LegendImage():
