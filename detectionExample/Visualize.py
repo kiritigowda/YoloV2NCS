@@ -64,8 +64,8 @@ def Visualize(img, results):
                 right = results[i].right
                 bottom = results[i].bottom
                 confidence = results[i].confidence
-                confidence = confidence * 100
-                confidence = format(confidence,'.2f') 
+                confidence = int(confidence * 100)
+                #confidence = format(confidence,'.2f')
                 txt = txt+' '+str(confidence)+'%'
                 cv2.rectangle(img_cp, (left,top), (right,bottom), clr, thickness=2)
                 size = cv2.getTextSize(txt, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
