@@ -141,7 +141,9 @@ if __name__ == '__main__':
                     break
         exit()
     elif sys.argv[1] == '--capture':
-        print ('Capturing Live')
+        print ('AMD Object Detection Live')
+        window_name = "AMD Object Detection - Live"
+        cv2.namedWindow(window_name, cv2.WINDOW_GUI_EXPANDED)
         capmode = args.capmode    
         cap = cv2.VideoCapture(0)
         assert cap.isOpened(), 'Cannot capture source'    
@@ -153,7 +155,7 @@ if __name__ == '__main__':
                 frame = cv2.flip(frame, 1)                
                 results = detector.Detect(frame)
                 imdraw = Visualize(frame, results)
-                cv2.imshow('AMD YoloV2 Live', imdraw)
+                cv2.imshow(window_name, imdraw)
                 key = cv2.waitKey(1)
                 if key & 0xFF == ord('q'):
                     break
