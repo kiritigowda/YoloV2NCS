@@ -4,9 +4,54 @@ import csv
 import shutil
 from distutils.dir_util import copy_tree
 import subprocess
+import numpy as np
 
 colornum = 20
-colors = [(160,82,45),(128,0,0),(47,79,79),(255,240,245),(240,255,255),(255,105,180),(255,255,0),(75,0,130),(153,50,204),(230,230,250),(0,0,255),(0,191,255),(0,128,128),(0,255,255),(107,142,35),(0,128,0),(124,252,0),(199,21,133),(255,140,0),(250,128,114)];
+colors =    [
+            (160,82,45),        # aeroplane
+            (128,0,0),          # bicycle
+            (47,79,79),         # bird
+            (155,140,145),      # boat
+            (140,155,255),      # bottle
+            (255,105,180),      # bus
+            (255,0,0),          # car
+            (75,0,130),         # cat
+            (255,140,0),        # chair
+            (250,128,114),      # cow
+            (153,50,204),       # diningtable
+            (130,230,150),      # dog
+            (0,220,255),        # horse
+            (0,191,255),        # motorbike
+            (0,0,255),          # person
+            (0,255,255),        # potted plant
+            (107,142,35),       # sheep
+            (0,128,0),          # sofa
+            (124,252,0),        # train
+            (199,21,133)        # tvmonitor
+            ];
+
+CLASSES =   [
+            "aeroplane",
+            "bicycle",
+            "bird",
+            "boat",
+            "bottle",
+            "bus",
+            "car",
+            "cat",
+            "chair",
+            "cow",
+            "dining table",
+            "dog",
+            "horse",
+            "motorbike",
+            "person",
+            "potted plant",
+            "sheep",
+            "sofa",
+            "train",
+            "tvmonitor"
+            ]
 
 
 def Visualize(img, results):
@@ -148,3 +193,4 @@ def VisualizeBox(image, img, results, anniedir):
                 crop_imgs.append(crop_img)
     
     return crop_imgs
+
