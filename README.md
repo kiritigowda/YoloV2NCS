@@ -31,6 +31,28 @@ python ./detectionExample/Main.py --video <video location> --annpythonlib <liban
 This runs inference and detections and results will be like this: 
 ![](/data/yolo_dog.jpg)
 
+## Yolo Cascaded with Classification
+### 1. Resize to 416X416 for Yolo and 1024X1024 for classification
+
+Use the following link to resize the images. 
+
+https://github.com/kiritigowda/help/tree/master/classificationLabelGenerator
+
+### 2. Save annie-capture demo and YoloV2NCS in a common folder
+annie-capture demo: https://github.com/kiritigowda/annie-capture-demo
+
+### 3. Run step 1 and step 2 as above.
+
+### 4. Run tests
+```
+python -W ignore detectionExample/Main.py --imagefolder <images1_416X416/> --cascade <images1_1024X1024/> --weights <weights.bin> --annpythonlib <libannpython.so>
+(and use key press for mode change)
+```
+(or)
+```
+python ./detectionExample/Main.py --capture 0 --annpythonlib <libannpython.so> --weights <weights.bin> (live Capture)
+(and use key press for mode change)
+```
 # Run Other YoloV2 models
 ### Convert Yolo to Caffe 
 ```
@@ -48,6 +70,28 @@ The converted caffe models should end with "prototxt" and "caffemodel".
 Please update parameters (biases, object names, etc) in ./src/CRegionLayer.cpp, and parameters (dim, blockwd, targetBlockwd, classe, etc) in ./detectionExample/ObjectWrapper.py.
 
 Please read ./src/CRegionLayer.cpp and ./detectionExample/ObjectWrapper.py for details.
+
+## Key Press Options when in capture mode:
+Press these different keys to switch between modes (uses openCV)
+1. **Keys '1' through 'n'** - Runs through a folder corresponding to number once and goes back to live mode (currently supports keys 1,2 folders)
+
+2. **Key 'f'** - Runs through a folder until asked to change
+
+3. **Key 'q'** - Quits from the program
+
+4. **Key 'Space Bar'** - pauses the capture until space bar pressed again
+
+5. **Key 'x'** - Runs cascaded classification on bounding boxes obtained in each frame.
+
+## Key Press Options when in imagefolder mode:
+Press these different keys to switch between modes (uses openCV)
+1. **Key 'c'** - Switches to camera capture mode until asked to change
+ 
+2. **Key 'q'** - Quits from the program
+ 
+3. **Key 'Space Bar'** - pauses the capture until space bar pressed again
+
+5. **Key 'x'** - Runs cascaded classification on bounding boxes obtained in each image.
 
 # References
 + [caffe](https://github.com/BVLC/caffe)
